@@ -3,6 +3,9 @@ name: 'Jira add comment'
 on:
   workflow_call:
     inputs:
+      jira_server:
+        required: true
+        type: string
       issue_id:
         required: true
         type: string
@@ -25,8 +28,9 @@ jobs:
     steps:
       - name: 'Add comment'
         run: |
-          source ./jira.sh
-          addComment ${{ inputs.issue_id }} ${{ inputs.comment }} ${{ inputs.retry_count }}
-        env:
-          JIRA_USERNAME: ${{ secrets.username }}
-          JIRA_TOKEN: ${{ secrets.token }}
+          curl --request POST \
+            --user "${{ secrets.username }}:${{ secrets.token }}" \
+            --header 'Content-Type: application/json' \
+            --retry "${{ inputs.retry_count }}" \
+            --data "{ \"body\" : \"${{ inputs.comment }}\" }" \
+            --url "${{ inputs.jira_server }}/rest/api/2/issue/${{ inputs.issue_id }}/comment"
