@@ -1,0 +1,32 @@
+name: 'Jira add comment'
+
+on:
+  workflow_call:
+    inputs:
+      issue_id:
+        required: true
+        type: string
+      comment:
+        required: true
+        type: string
+      retry_count:
+        default: 3
+        required: false
+        type: number
+    secrets:
+      username:
+        required: true
+      token:
+        required: true
+
+jobs:
+  jira:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Add comment'
+        run: |
+          source ./jira.sh
+          addComment ${{ inputs.issue_id }} ${{ inputs.comment }} ${{ inputs.retry_count }}
+        env:
+          JIRA_USERNAME: ${{ secrets.username }}
+          JIRA_TOKEN: ${{ secrets.token }}
